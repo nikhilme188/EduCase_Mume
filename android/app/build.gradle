@@ -117,3 +117,19 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+// Task to copy vector icon fonts to assets
+task copyFonts {
+    doLast {
+        def srcDir = "../../node_modules/react-native-vector-icons/Fonts"
+        def destDir = "src/main/assets/fonts"
+        if (file(srcDir).exists()) {
+            copy {
+                from srcDir
+                into destDir
+            }
+        }
+    }
+}
+
+preBuild.dependsOn copyFonts
