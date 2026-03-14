@@ -10,7 +10,6 @@ import {
   setCurrentTime,
 } from '../store/playerSlice';
 import { useTheme } from '../hooks/useTheme';
-import { useAudioPlayback } from '../hooks/useAudioPlayback';
 import { useProgressTracking } from '../hooks/usePlayerControls';
 import SeekBar from '../components/SeekBar';
 import audioService from '../services/audioService';
@@ -29,7 +28,6 @@ const Player: React.FC<PlayerScreenProps> = ({ navigation }) => {
   );
 
   // Custom hooks for separated concerns
-  useAudioPlayback();
   useProgressTracking();
 
   if (!currentSong) {

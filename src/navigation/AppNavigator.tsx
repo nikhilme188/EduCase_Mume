@@ -10,6 +10,7 @@ import Favourite from '../screens/Favourite';
 import Playlist from '../screens/Playlist';
 import Setting from '../screens/Setting';
 import Player from '../screens/Player';
+import DetailView from '../components/DetailView';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -74,6 +75,7 @@ const AppNavigator = () => {
       >
         <Stack.Screen name="Tabs" component={TabNavigator} />
         <Stack.Screen name="Player" component={Player} />
+        <Stack.Screen name="AlbumDetail" component={DetailView} />
       </Stack.Navigator>
     </NavigationContainer>
   );

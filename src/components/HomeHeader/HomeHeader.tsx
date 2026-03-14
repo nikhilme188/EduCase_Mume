@@ -7,22 +7,33 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '../hooks/useTheme';
+import { useTheme } from '../../hooks/useTheme';
+import { closeFilter } from '../../store/filterSlice';
 
 const HomeHeader = () => {
   const theme = useTheme();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const handleSearchPress = () => {
     navigation.navigate('Search' as never);
   };
 
+  const handleHeaderPress = () => {
+    dispatch(closeFilter());
+  };
+
   return (
-    <View style={[styles.header, { backgroundColor: theme.background }]}>
+    <TouchableOpacity 
+      style={[styles.header, { backgroundColor: "theme.background" }]}
+      onPress={handleHeaderPress}
+      activeOpacity={1}
+    >
       <View style={styles.logo}>
         <Image
-          source={require('../../assets/mume.png')}
+          source={require('../../../assets/mume.png')}
           style={styles.logoIcon}
           resizeMode="contain"
         />
@@ -34,7 +45,7 @@ const HomeHeader = () => {
           <Ionicons name="search" size={24} color={theme.text} />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

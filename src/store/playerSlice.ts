@@ -37,6 +37,20 @@ export const togglePlayPauseAsync = createAsyncThunk(
   }
 );
 
+export const pauseAsync = createAsyncThunk(
+  'player/pause',
+  async (_, { getState }) => {
+    const state = getState() as { player: PlayerState };
+    const currentState = state.player;
+    
+    if (currentState.isPlaying) {
+      await audioService.pause();
+    }
+    
+    return false;
+  }
+);
+
 const playerSlice = createSlice({
   name: 'player',
   initialState,
@@ -84,6 +98,9 @@ const playerSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(togglePlayPauseAsync.fulfilled, (state, action) => {
+      state.isPlaying = action.payload;
+    });
+    builder.addCase(pauseAsync.fulfilled, (state, action) => {
       state.isPlaying = action.payload;
     });
   },

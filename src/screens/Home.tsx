@@ -4,14 +4,18 @@ import {
   View,
 } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../hooks/useTheme';
 import { Songs, Artist, Album, Suggested } from './HomeTabs';
 import HomeHeader from '../components/HomeHeader';
+import MiniPlayer from '../components/MiniPlayer';
 
 const Tab = createMaterialTopTabNavigator();
 
 const Home = () => {
   const theme = useTheme();
+  const navigation = useNavigation();
+  const parentNavigation = (navigation as any)?.getParent?.();
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -41,6 +45,7 @@ const Home = () => {
         <Tab.Screen name="Album" component={Album} />
         <Tab.Screen name="Suggested" component={Suggested} />
       </Tab.Navigator>
+      <MiniPlayer onPress={() => parentNavigation?.navigate('Player')} />
     </View>
   );
 };

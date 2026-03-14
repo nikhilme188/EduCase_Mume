@@ -13,9 +13,13 @@ import {
 import { Provider, useSelector } from 'react-redux';
 import { store, RootState } from './src/store/store';
 import AppNavigator from './src/navigation/AppNavigator';
+import { useAudioPlayback } from './src/hooks/useAudioPlayback';
 
 function AppContent() {
   const isDark = useSelector((state: RootState) => state.theme.isDark);
+  
+  // Initialize audio playback globally
+  useAudioPlayback();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#181A20' : '#ffffff' }} edges={['top', 'bottom', 'left', 'right']}>
