@@ -21,7 +21,7 @@ const SongsHeader: React.FC<SongsHeaderProps> = ({
     itemLabel = 'songs',
 }) => {
     const displayText = totalSongs
-        ? `${songCount} of ${totalSongs} ${itemLabel}`
+        ? `${songCount} ${itemLabel}`
         : `${songCount} ${itemLabel}`;
 
     return (

@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
-import { setCurrentSong, togglePlayPauseAsync } from '../store/playerSlice';
+import { setCurrentSongWithTracking, togglePlayPauseAsync } from '../store/playerSlice';
 import { Song } from '../types/song';
 
 interface UseSongPlaybackReturn {
@@ -27,7 +27,7 @@ export const useSongPlayback = (song: Song, queue: Song[]): UseSongPlaybackRetur
       dispatch(togglePlayPauseAsync());
     } else {
       // Set as current song and play
-      dispatch(setCurrentSong({ song, queue }));
+      dispatch(setCurrentSongWithTracking({ song, queue }));
     }
   };
 

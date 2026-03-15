@@ -40,10 +40,11 @@ const Home = () => {
           },
         }}
       >
+        <Tab.Screen name="Suggested" component={Suggested} />
         <Tab.Screen name="Songs" component={Songs} />
         <Tab.Screen name="Artist" component={Artist} />
         <Tab.Screen name="Album" component={Album} />
-        <Tab.Screen name="Suggested" component={Suggested} />
+
       </Tab.Navigator>
       <MiniPlayer onPress={() => parentNavigation?.navigate('Player')} />
     </View>

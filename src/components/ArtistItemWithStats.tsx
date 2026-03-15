@@ -12,7 +12,7 @@ import { Artist } from '../types/artist';
 interface ArtistItemWithStatsProps {
   artist: Artist;
   onPress: () => void;
-  onMenuPress: () => void;
+  onMenuPress: (stats?: { totalAlbums?: number; totalSongs?: number }) => void;
   theme: any;
 }
 
@@ -35,7 +35,7 @@ const ArtistItemWithStats: React.FC<ArtistItemWithStatsProps> = ({
       albumCount={stats?.totalAlbums || 0}
       songCount={stats?.totalSongs || 0}
       onPress={onPress}
-      onMenuPress={onMenuPress}
+      onMenuPress={() => onMenuPress(stats || { totalAlbums: 0, totalSongs: 0 })}
       theme={theme}
       loadingStats={loading}
     />

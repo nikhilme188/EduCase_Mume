@@ -7,8 +7,10 @@ interface SongActionButtonsProps {
   isPlaying: boolean;
   onPlayPress: () => void;
   onPausePress?: () => void;
-  onMenuPress: () => void;
+  onMenuPress?: () => void;
   theme?: any;
+  showMenu?: boolean;
+  buttonSize?: number;
 }
 
 /**
@@ -22,6 +24,8 @@ const SongActionButtons: React.FC<SongActionButtonsProps> = ({
   onPausePress,
   onMenuPress,
   theme,
+  showMenu = true,
+  buttonSize = 40,
 }) => {
   const menuColor = theme?.text || '#000000';
 
@@ -38,13 +42,15 @@ const SongActionButtons: React.FC<SongActionButtonsProps> = ({
       <TouchableOpacity onPress={handlePlayPausePress} style={styles.playButton}>
         <Ionicons
           name={isCurrentSong && isPlaying ? 'pause-circle' : 'play-circle'}
-          size={40}
+          size={buttonSize}
           color="#FF8216"
         />
       </TouchableOpacity>
-      <TouchableOpacity onPress={onMenuPress} style={styles.menuButton}>
-        <Ionicons name="ellipsis-vertical" size={24} color={menuColor} />
-      </TouchableOpacity>
+      {showMenu && onMenuPress && (
+        <TouchableOpacity onPress={onMenuPress} style={styles.menuButton}>
+          <Ionicons name="ellipsis-vertical" size={24} color={menuColor} />
+        </TouchableOpacity>
+      )}
     </>
   );
 };

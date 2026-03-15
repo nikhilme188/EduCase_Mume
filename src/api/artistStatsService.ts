@@ -37,11 +37,23 @@ export const getArtistAlbumCount = async (artistId: string): Promise<number> => 
     const response = await fetch(
       `${BASE_URL}/artists/${artistId}/albums?page=1`
     );
-    const data: ArtistAlbumsResponse = await response.json();
+    
+    if (!response.ok) {
+      console.error(`API returned status ${response.status}`);
+      return 0;
+    }
+
+    const text = await response.text();
+    if (!text) {
+      console.warn('Empty response from artist albums API');
+      return 0;
+    }
+
+    const data: ArtistAlbumsResponse = JSON.parse(text);
     return data.success && data.data ? data.data.total : 0;
   } catch (error) {
     console.error('Error fetching artist album count:', error);
-    throw error;
+    return 0;
   }
 };
 
@@ -55,11 +67,23 @@ export const getArtistSongCount = async (artistId: string): Promise<number> => {
     const response = await fetch(
       `${BASE_URL}/artists/${artistId}/songs?page=1`
     );
-    const data: ArtistSongsResponse = await response.json();
+    
+    if (!response.ok) {
+      console.error(`API returned status ${response.status}`);
+      return 0;
+    }
+
+    const text = await response.text();
+    if (!text) {
+      console.warn('Empty response from artist songs API');
+      return 0;
+    }
+
+    const data: ArtistSongsResponse = JSON.parse(text);
     return data.success && data.data ? data.data.total : 0;
   } catch (error) {
     console.error('Error fetching artist song count:', error);
-    throw error;
+    return 0;
   }
 };
 
@@ -81,6 +105,9 @@ export const getArtistStats = async (artistId: string): Promise<ArtistStats> => 
     };
   } catch (error) {
     console.error('Error fetching artist stats:', error);
-    throw error;
+    return {
+      totalAlbums: 0,
+      totalSongs: 0,
+    };
   }
 };

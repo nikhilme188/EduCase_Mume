@@ -22,7 +22,14 @@ export const useArtists = () => {
       const response = await searchArtists(query, 1, 10);
 
       if (response.success && response.data.results) {
-        setArtists((prevArtists) => [...prevArtists, ...response.data.results]);
+        setArtists((prevArtists) => {
+          // Deduplicate: only add artists that don't already exist by ID
+          const existingIds = new Set(prevArtists.map(a => a.id));
+          const newArtists = response.data.results.filter(
+            (artist: Artist) => !existingIds.has(artist.id)
+          );
+          return [...prevArtists, ...newArtists];
+        });
         setCurrentAlphabetIndex(alphabetIndex + 1);
       } else {
         setHasMore(false);

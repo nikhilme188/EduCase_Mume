@@ -34,11 +34,6 @@ const ArtistItem: React.FC<ArtistItemProps> = ({
     <TouchableOpacity 
       style={[
         styles.artistCard,
-        { 
-          backgroundColor: theme.background === '#ffffff' 
-            ? '#f5f5f5' 
-            : '#282c34'
-        },
       ]}
       onPress={onPress}
     >

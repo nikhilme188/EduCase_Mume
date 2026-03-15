@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   FlatList,
@@ -16,6 +16,7 @@ import { Artist } from '../../types/artist';
 import FilterPopup from '../../components/FilterModal';
 import SongsHeader from '../../components/SongsHeader';
 import ArtistItemWithStats from '../../components/ArtistItemWithStats';
+import ArtistOptionsModal from '../../components/ArtistOptionsModal';
 import { openFilter, closeFilter } from '../../store/filterSlice';
 import { RootState } from '../../store/store';
 
@@ -23,6 +24,13 @@ const ArtistScreen = () => {
   const navigation = useNavigation();
   const theme = useTheme();
   const dispatch = useDispatch();
+
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalStats, setModalStats] = useState<{ albumCount: number; songCount: number }>({
+    albumCount: 0,
+    songCount: 0,
+  });
 
   const { artists, loading, hasMore, loadInitialArtists, loadMoreArtists } =
     useArtists();
@@ -87,12 +95,27 @@ const ArtistScreen = () => {
       onPress={() => {
         (navigation as any).navigate('AlbumDetail', { artist: item, isArtist: true });
       }}
-      onMenuPress={() => {
-        console.log('Menu pressed for artist:', item.name);
+      onMenuPress={(stats) => {
+        setSelectedArtist(item);
+        setModalStats({
+          albumCount: stats?.totalAlbums || 0,
+          songCount: stats?.totalSongs || 0,
+        });
+        setIsModalVisible(true);
       }}
       theme={theme}
     />
   );
+
+  const handleOptionSelect = (option: string) => {
+    console.log(`Selected option: ${option} for artist:`, selectedArtist?.name);
+    // TODO: Implement option handling
+    // - play: Play all songs from this artist
+    // - playNext: Add to queue
+    // - queue: Add to playing queue
+    // - playlist: Add to playlist
+    // - share: Share artist
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -121,6 +144,16 @@ const ArtistScreen = () => {
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmptyState}
+      />
+
+      <ArtistOptionsModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        artist={selectedArtist}
+        albumCount={modalStats.albumCount}
+        songCount={modalStats.songCount}
+        theme={theme}
+        onOptionSelect={handleOptionSelect}
       />
     </View>
   );

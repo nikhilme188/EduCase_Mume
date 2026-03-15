@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../store/store';
-import { setCurrentSong } from '../store/playerSlice';
+import { setCurrentSongWithTracking } from '../store/playerSlice';
 import { Song } from '../types/song';
 import SongOptionsModal from './SongOptionsModal';
 import SongInfo from './SongInfo';
@@ -50,7 +50,7 @@ const SongItem: React.FC<SongItemProps> = ({ song, theme, songs, navigation }) =
   const imageUrl = getBestQualityImage(song);
 
   const handleSongPress = () => {
-    dispatch(setCurrentSong({ song, queue: songs }));
+    dispatch(setCurrentSongWithTracking({ song, queue: songs }));
     navigation?.navigate('Player');
   };
 

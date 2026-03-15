@@ -40,6 +40,7 @@ interface AlbumSongsResponse {
         url: string;
       };
     }>;
+    total?: number;
   };
 }
 
@@ -47,52 +48,77 @@ export const albumService = {
   async getAlbumSongs(albumId: string): Promise<AlbumSongsResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/albums?id=${encodeURIComponent(albumId)}`);
-      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error(`API returned status ${response.status}`);
+        return {
+          success: false,
+          data: { songs: [] }
+        };
+      }
+
+      const text = await response.text();
+      if (!text) {
+        console.warn('Empty response from album songs API');
+        return {
+          success: false,
+          data: { songs: [] }
+        };
+      }
+
+      const data = JSON.parse(text);
       return data;
     } catch (error) {
       console.error('Error fetching album songs:', error);
-      throw error;
+      return {
+        success: false,
+        data: { songs: [] }
+      };
     }
   },
 
-  async getArtistSongs(artistId: string): Promise<AlbumSongsResponse> {
+  async getArtistSongsPage(artistId: string, page: number): Promise<AlbumSongsResponse> {
     try {
-      // Fetch all pages of artist songs
-      let allArtistSongs: any[] = [];
-      let page = 1;
-      let hasMorePages = true;
-
-      while (hasMorePages) {
-        const response = await fetch(
-          `${API_BASE_URL}/artists/${encodeURIComponent(artistId)}/songs?page=${page}&limit=50`
-        );
-        const data = await response.json();
-
-        console.log(`[albumService] Artist songs page ${page}:`, data);
-
-        if (data.success && data.data?.songs && Array.isArray(data.data.songs)) {
-          allArtistSongs = [...allArtistSongs, ...data.data.songs];
-          
-          // Check if there are more pages (limit * page < total)
-          if (data.data.total && allArtistSongs.length < data.data.total) {
-            page++;
-          } else {
-            hasMorePages = false;
-          }
-        } else {
-          hasMorePages = false;
-        }
+      const response = await fetch(
+        `${API_BASE_URL}/artists/${encodeURIComponent(artistId)}/songs?page=${page}&limit=50`
+      );
+      
+      if (!response.ok) {
+        console.error(`API returned status ${response.status} for page ${page}`);
+        return {
+          success: false,
+          data: { songs: [] }
+        };
       }
 
-      return {
-        success: true,
-        data: {
-          songs: allArtistSongs
-        }
-      };
+      const text = await response.text();
+      if (!text) {
+        console.warn(`Empty response for artist songs page ${page}`);
+        return {
+          success: false,
+          data: { songs: [] }
+        };
+      }
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error(`JSON parse error for page ${page}:`, parseError);
+        return {
+          success: false,
+          data: { songs: [] }
+        };
+      }
+
+      console.log(`[albumService] Artist songs page ${page}:`, data);
+      return data;
     } catch (error) {
-      console.error('Error fetching artist songs:', error);
-      throw error;
+      console.error(`Error fetching artist songs page ${page}:`, error);
+      return {
+        success: false,
+        data: { songs: [] }
+      };
     }
   },
 };

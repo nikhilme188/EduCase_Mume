@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import { useArtistStats } from '../hooks/useArtistStats';
 import AlbumSongsList from './AlbumSongsList';
 import { AlbumDetail as AlbumDetailType } from '../types/album';
 import { Artist } from '../types/artist';
-import { setCurrentSong, togglePlayPause, pauseAsync } from '../store/playerSlice';
+import { setCurrentSongWithTracking, togglePlayPause, pauseAsync } from '../store/playerSlice';
 import { RootState, AppDispatch } from '../store/store';
 
 const DetailView = () => {
@@ -24,6 +24,8 @@ const DetailView = () => {
   const route = useRoute();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const lastScrollY = useRef(0);
   
   const album = (route.params as any)?.album as AlbumDetailType | undefined;
   const artist = (route.params as any)?.artist as Artist | undefined;
@@ -54,7 +56,7 @@ const DetailView = () => {
     if (currentSong?.id === song.id) {
       dispatch(togglePlayPause());
     } else {
-      dispatch(setCurrentSong({ song: song as any, queue: songs as any }));
+      dispatch(setCurrentSongWithTracking({ song: song as any, queue: songs as any }));
     }
   };
 
@@ -86,8 +88,21 @@ const DetailView = () => {
 
   return (
     <ScrollView
+      ref={scrollViewRef}
       style={[styles.container, { backgroundColor: theme.background }]}
       showsVerticalScrollIndicator={false}
+      onScroll={({ nativeEvent }) => {
+        const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+        const paddingToBottom = 500; // Trigger when within 500 points from bottom
+        
+        if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+          if (hasMore && !loading) {
+            loadMore();
+          }
+        }
+        lastScrollY.current = contentOffset.y;
+      }}
+      scrollEventThrottle={16}
     >
       {/* Header with Back Button */}
       <View style={styles.header}>
@@ -176,6 +191,7 @@ const DetailView = () => {
           onOptionPress={handleOptionPress}
           mainName={isArtist ? artist?.name : album?.name}
           isArtist={isArtist}
+          albumImage={album?.image?.[2]?.url || album?.image?.[1]?.url || album?.image?.[0]?.url}
         />
       </View>
     </ScrollView>

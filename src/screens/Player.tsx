@@ -12,6 +12,7 @@ import {
 import { useTheme } from '../hooks/useTheme';
 import { useProgressTracking } from '../hooks/usePlayerControls';
 import SeekBar from '../components/SeekBar';
+import SongActionButtons from '../components/SongActionButtons';
 import audioService from '../services/audioService';
 
 interface PlayerScreenProps {
@@ -63,7 +64,8 @@ const Player: React.FC<PlayerScreenProps> = ({ navigation }) => {
       />
       <PlayerControls 
         isPlaying={isPlaying} 
-        dispatch={dispatch} 
+        dispatch={dispatch}
+        theme={theme}
       />
     </View>
   );
@@ -132,23 +134,11 @@ const SongInfo: React.FC<SongInfoProps> = ({ song, primaryArtist, theme }) => (
 interface PlayerControlsProps {
   isPlaying: boolean;
   dispatch: AppDispatch;
+  theme: any;
 }
 
-const PlayerControls: React.FC<PlayerControlsProps> = ({ isPlaying, dispatch }) => (
-  <View style={styles.controlsContainer}>
-    <SkipButton direction="back" dispatch={dispatch} />
-    <PlayPauseButton isPlaying={isPlaying} dispatch={dispatch} />
-    <SkipButton direction="forward" dispatch={dispatch} />
-  </View>
-);
-
-interface SkipButtonProps {
-  direction: 'back' | 'forward';
-  dispatch: AppDispatch;
-}
-
-const SkipButton: React.FC<SkipButtonProps> = ({ direction, dispatch }) => {
-  const handlePress = async () => {
+const PlayerControls: React.FC<PlayerControlsProps> = ({ isPlaying, dispatch, theme }) => {
+  const handleSkip = async (direction: 'back' | 'forward') => {
     if (direction === 'back') {
       dispatch(playPrevious());
       await audioService.skipToPrevious();
@@ -159,39 +149,27 @@ const SkipButton: React.FC<SkipButtonProps> = ({ direction, dispatch }) => {
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.controlButton}>
-      <Ionicons
-        name={direction === 'back' ? 'play-skip-back' : 'play-skip-forward'}
-        size={32}
-        color="#FF8216"
+    <View style={styles.controlsContainer}>
+      <TouchableOpacity onPress={() => handleSkip('back')} style={styles.controlButton}>
+        <Ionicons name="play-skip-back" size={32} color="#FF8216" />
+      </TouchableOpacity>
+
+      <SongActionButtons
+        isCurrentSong={true}
+        isPlaying={isPlaying}
+        onPlayPress={() => dispatch(togglePlayPauseAsync())}
+        onPausePress={() => dispatch(togglePlayPauseAsync())}
+        theme={theme}
+        showMenu={false}
+        buttonSize={100}
       />
-    </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => handleSkip('forward')} style={styles.controlButton}>
+        <Ionicons name="play-skip-forward" size={32} color="#FF8216" />
+      </TouchableOpacity>
+    </View>
   );
 };
-
-interface PlayPauseButtonProps {
-  isPlaying: boolean;
-  dispatch: AppDispatch;
-}
-
-const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({ isPlaying, dispatch }) => (
-  <TouchableOpacity
-    onPress={() => {
-      console.log('Play button tapped. Current state:', isPlaying ? 'playing' : 'paused');
-      dispatch(togglePlayPauseAsync());
-    }}
-    style={[styles.playPauseButton, { backgroundColor: '#FF8216' }]}
-  >
-    {isPlaying ? (
-      <Ionicons name="pause" size={48} color="#ffffff" />
-    ) : (
-      <>
-        <Text> </Text>
-        <Ionicons name="play" size={48} color="#ffffff" />
-      </>
-    )}
-  </TouchableOpacity>
-);
 
 
 
@@ -246,18 +224,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 40,
+    gap: 20,
   },
   controlButton: {
-    marginHorizontal: 20,
     padding: 12,
-  },
-  playPauseButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 20,
   },
 });
 

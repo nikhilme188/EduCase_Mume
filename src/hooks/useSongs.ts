@@ -22,7 +22,14 @@ export const useSongs = () => {
       const response = await searchSongs(query, 1, 15);
 
       if (response.success && response.data.results) {
-        setSongs((prevSongs) => [...prevSongs, ...response.data.results]);
+        setSongs((prevSongs) => {
+          // Deduplicate: only add songs that don't already exist by ID
+          const existingIds = new Set(prevSongs.map(s => s.id));
+          const newSongs = response.data.results.filter(
+            (song: Song) => !existingIds.has(song.id)
+          );
+          return [...prevSongs, ...newSongs];
+        });
         setCurrentAlphabetIndex(alphabetIndex + 1);
       } else {
         setHasMore(false);

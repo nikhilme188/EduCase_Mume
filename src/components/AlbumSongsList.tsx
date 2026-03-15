@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   FlatList,
@@ -26,6 +26,7 @@ interface AlbumSongsListProps {
   onOptionPress?: (song: AlbumSong) => void;
   mainName?: string;
   isArtist?: boolean;
+  albumImage?: string;
 }
 
 const AlbumSongsList: React.FC<AlbumSongsListProps> = ({
@@ -42,16 +43,31 @@ const AlbumSongsList: React.FC<AlbumSongsListProps> = ({
   onOptionPress,
   mainName,
   isArtist = false,
+  albumImage,
 }) => {
   const renderSongItem = ({ item }: { item: AlbumSong }) => {
     const isCurrentSong = currentSongId === item.id;
+    let songImageUri = '';
+    
+    // Priority 1: Use song image
+    if (item.image && item.image.length > 0) {
+      const highestQualityImage = item.image[item.image.length - 1];
+      songImageUri = highestQualityImage?.url || item.image[0]?.url || '';
+    }
+    
+    // Priority 2: Fallback to album image
+    if (!songImageUri && albumImage) {
+      songImageUri = albumImage;
+    }
 
     return (
       <View style={styles.songItemWrapper}>
-        <Image
-          source={{ uri: item.image?.[2]?.url || item.image?.[1]?.url || item.image?.[0]?.url }}
-          style={styles.songThumbnail}
-        />
+        {songImageUri && (
+          <Image
+            source={{ uri: songImageUri }}
+            style={styles.songThumbnail}
+          />
+        )}
         <View style={styles.songDetails}>
           <Text
             style={[styles.songName, { color: theme.text }]}
@@ -78,22 +94,6 @@ const AlbumSongsList: React.FC<AlbumSongsListProps> = ({
     );
   };
 
-  const renderFooter = () => {
-    if (!hasMore) return null;
-
-    return (
-      <View style={styles.footer}>
-        {loading ? (
-          <ActivityIndicator size="small" color="#FF8216" />
-        ) : (
-          <Text style={[styles.loadMoreText, { color: theme.textSecondary }]}>
-            Load more songs
-          </Text>
-        )}
-      </View>
-    );
-  };
-
   if (totalSongs === 0 && !loading) {
     return (
       <Text style={[styles.noSongs, { color: theme.textSecondary }]}>
@@ -108,13 +108,6 @@ const AlbumSongsList: React.FC<AlbumSongsListProps> = ({
       renderItem={renderSongItem}
       keyExtractor={(item, index) => `${item.id}-${index}`}
       scrollEnabled={false}
-      onEndReached={() => {
-        if (hasMore && !loading) {
-          onLoadMore();
-        }
-      }}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={renderFooter}
     />
   );
 };
@@ -146,14 +139,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     paddingVertical: 20,
-  },
-  footer: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  loadMoreText: {
-    fontSize: 12,
-    fontWeight: '500',
   },
 });
 

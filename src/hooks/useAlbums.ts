@@ -22,7 +22,14 @@ export const useAlbums = () => {
       const response = await searchAlbums(query, 1, 10);
 
       if (response.success && response.data.results) {
-        setAlbums((prevAlbums) => [...prevAlbums, ...response.data.results]);
+        setAlbums((prevAlbums) => {
+          // Deduplicate: only add albums that don't already exist by ID
+          const existingIds = new Set(prevAlbums.map(a => a.id));
+          const newAlbums = response.data.results.filter(
+            (album: AlbumDetail) => !existingIds.has(album.id)
+          );
+          return [...prevAlbums, ...newAlbums];
+        });
         setCurrentAlphabetIndex(alphabetIndex + 1);
       } else {
         setHasMore(false);

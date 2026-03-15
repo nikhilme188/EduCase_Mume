@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -11,6 +11,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootState, AppDispatch } from '../store/store';
 import { togglePlayPauseAsync } from '../store/playerSlice';
 import { useTheme } from '../hooks/useTheme';
+import { recentlyPlayedService } from '../api/recentlyPlayedService';
 
 interface MiniPlayerProps {
   onPress: () => void;
@@ -20,6 +21,22 @@ const MiniPlayer: React.FC<MiniPlayerProps> = ({ onPress }) => {
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
   const { currentSong, isPlaying } = useSelector((state: RootState) => state.player);
+
+  // Add song to recently played when it starts playing
+  useEffect(() => {
+    if (isPlaying && currentSong) {
+      const addToRecentlyPlayed = async () => {
+        await recentlyPlayedService.addRecentlyPlayed({
+          id: currentSong.id,
+          name: currentSong.name,
+          image: currentSong.image || [],
+          artists: currentSong.artists,
+        });
+        console.log('[MiniPlayer] Added to recently played:', currentSong.name);
+      };
+      addToRecentlyPlayed();
+    }
+  }, [isPlaying, currentSong?.id]);
 
   if (!currentSong) return null;
 

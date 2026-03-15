@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { Song } from '../types/song';
 import audioService from '../services/audioService';
+import { recentlyPlayedService } from '../api/recentlyPlayedService';
+import { mostPlayedService } from '../api/mostPlayedService';
 
 interface PlayerState {
   currentSong: Song | null;
@@ -48,6 +50,54 @@ export const pauseAsync = createAsyncThunk(
     }
     
     return false;
+  }
+);
+
+export const setCurrentSongWithTracking = createAsyncThunk(
+  'player/setCurrentSongWithTracking',
+  async (payload: { song: Song; queue: Song[] }, { dispatch }) => {
+    const { song, queue } = payload;
+    
+    console.log('[playerSlice] setCurrentSongWithTracking called for:', song.name, song.id);
+    console.log('[playerSlice] Song data:', {
+      id: song.id,
+      name: song.name,
+      hasImage: !!song.image,
+      hasArtists: !!song.artists,
+      hasDownloadUrl: !!song.downloadUrl,
+      downloadUrl: song.downloadUrl,
+    });
+    
+    try {
+      // Track in recently played
+      console.log('[playerSlice] Adding to recently played...');
+      await recentlyPlayedService.addRecentlyPlayed({
+        id: song.id,
+        name: song.name,
+        image: song.image,
+        downloadUrl: song.downloadUrl,
+        artists: song.artists,
+      });
+      console.log('[playerSlice] Successfully added to recently played');
+      
+      // Track in most played (increment play count)
+      console.log('[playerSlice] Adding to most played...');
+      await mostPlayedService.addPlayCount({
+        id: song.id,
+        name: song.name,
+        image: song.image,
+        downloadUrl: song.downloadUrl,
+        artists: song.artists,
+      });
+      console.log('[playerSlice] Successfully added to most played');
+      
+      console.log('[playerSlice] ✅ Tracked play for song:', song.name);
+    } catch (error) {
+      console.error('[playerSlice] ❌ Error tracking play count:', error);
+    }
+    
+    // Return the payload to be used in the reducer
+    return payload;
   }
 );
 
@@ -102,6 +152,12 @@ const playerSlice = createSlice({
     });
     builder.addCase(pauseAsync.fulfilled, (state, action) => {
       state.isPlaying = action.payload;
+    });
+    builder.addCase(setCurrentSongWithTracking.fulfilled, (state, action) => {
+      state.currentSong = action.payload.song;
+      state.queue = action.payload.queue;
+      state.currentIndex = action.payload.queue.findIndex((s) => s.id === action.payload.song.id);
+      state.isPlaying = true;
     });
   },
 });
